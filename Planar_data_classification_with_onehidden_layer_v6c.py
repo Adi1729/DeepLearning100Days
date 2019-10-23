@@ -35,7 +35,7 @@
 # - testCases provides some test examples to assess the correctness of your functions
 # - planar_utils provide various useful functions used in this assignment
 
-# In[1]:
+# In[3]:
 
 # Package imports
 import numpy as np
@@ -55,14 +55,14 @@ np.random.seed(1) # set a seed so that the results are consistent
 # 
 # First, let's get the dataset you will work on. The following code will load a "flower" 2-class dataset into variables `X` and `Y`.
 
-# In[2]:
+# In[4]:
 
 X, Y = load_planar_dataset()
 
 
 # Visualize the dataset using matplotlib. The data looks like a "flower" with some red (label y=0) and some blue (y=1) points. Your goal is to build a model to fit this data. In other words, we want the classifier to define regions as either red or blue.
 
-# In[3]:
+# In[5]:
 
 # Visualize the data:
 plt.scatter(X[0, :], X[1, :], c=Y, s=40, cmap=plt.cm.Spectral);
@@ -78,7 +78,7 @@ plt.scatter(X[0, :], X[1, :], c=Y, s=40, cmap=plt.cm.Spectral);
 # 
 # **Hint**: How do you get the shape of a numpy array? [(help)](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.shape.html)
 
-# In[4]:
+# In[6]:
 
 ### START CODE HERE ### (≈ 3 lines of code)
 shape_X = X.shape
@@ -116,7 +116,7 @@ print ('I have m = %d training examples!' % (m))
 # 
 # Before building a full neural network, lets first see how logistic regression performs on this problem. You can use sklearn's built-in functions to do that. Run the code below to train a logistic regression classifier on the dataset.
 
-# In[5]:
+# In[7]:
 
 # Train the logistic regression classifier
 clf = sklearn.linear_model.LogisticRegressionCV();
@@ -125,7 +125,7 @@ clf.fit(X.T, Y.T);
 
 # You can now plot the decision boundary of these models. Run the code below.
 
-# In[6]:
+# In[8]:
 
 # Plot the decision boundary for logistic regression
 plot_decision_boundary(lambda x: clf.predict(x), X, Y)
@@ -189,7 +189,7 @@ print ('Accuracy of logistic regression: %d ' % float((np.dot(Y,LR_predictions) 
 # 
 # **Hint**: Use shapes of X and Y to find n_x and n_y. Also, hard code the hidden layer size to be 4.
 
-# In[7]:
+# In[9]:
 
 # GRADED FUNCTION: layer_sizes
 
@@ -212,7 +212,7 @@ def layer_sizes(X, Y):
     return (n_x, n_h, n_y)
 
 
-# In[8]:
+# In[10]:
 
 X_assess, Y_assess = layer_sizes_test_case()
 (n_x, n_h, n_y) = layer_sizes(X_assess, Y_assess)
@@ -252,7 +252,7 @@ print("The size of the output layer is: n_y = " + str(n_y))
 # - You will initialize the bias vectors as zeros. 
 #     - Use: `np.zeros((a,b))` to initialize a matrix of shape (a,b) with zeros.
 
-# In[9]:
+# In[11]:
 
 # GRADED FUNCTION: initialize_parameters
 
@@ -293,7 +293,7 @@ def initialize_parameters(n_x, n_h, n_y):
     return parameters
 
 
-# In[10]:
+# In[12]:
 
 n_x, n_h, n_y = initialize_parameters_test_case()
 
@@ -351,7 +351,7 @@ print("b2 = " + str(parameters["b2"]))
 #     2. Implement Forward Propagation. Compute $Z^{[1]}, A^{[1]}, Z^{[2]}$ and $A^{[2]}$ (the vector of all your predictions on all the examples in the training set).
 # - Values needed in the backpropagation are stored in "`cache`". The `cache` will be given as an input to the backpropagation function.
 
-# In[11]:
+# In[13]:
 
 # GRADED FUNCTION: forward_propagation
 
@@ -377,7 +377,7 @@ def forward_propagation(X, parameters):
     ### START CODE HERE ### (≈ 4 lines of code)
     Z1 = np.dot(W1,X) + b1
     A1 = np.tanh(Z1)
-    Z2 = np.dot(W2,Z1) + b2
+    Z2 = np.dot(W2,A1) + b2
     A2 = sigmoid(Z2)
     ### END CODE HERE ###
     
@@ -391,7 +391,7 @@ def forward_propagation(X, parameters):
     return A2, cache
 
 
-# In[12]:
+# In[14]:
 
 X_assess, parameters = forward_propagation_test_case()
 A2, cache = forward_propagation(X_assess, parameters)
@@ -424,7 +424,7 @@ print(np.mean(cache['Z1']) ,np.mean(cache['A1']),np.mean(cache['Z2']),np.mean(ca
 # (you can use either `np.multiply()` and then `np.sum()` or directly `np.dot()`).  
 # Note that if you use `np.multiply` followed by `np.sum` the end result will be a type `float`, whereas if you use `np.dot`, the result will be a 2D numpy array.  We can use `np.squeeze()` to remove redundant dimensions (in the case of single float, this will be reduced to a zero-dimension array). We can cast the array as a type `float` using `float()`.
 
-# In[13]:
+# In[21]:
 
 # GRADED FUNCTION: compute_cost
 
@@ -452,8 +452,8 @@ def compute_cost(A2, Y, parameters):
 
     # Compute the cross-entropy cost
     ### START CODE HERE ### (≈ 2 lines of code)
-    logprobs = np.multiply(np.log(A2),Y)
-    cost = - np.sum(logprobs)
+    logprobs = np.multiply(np.log(A2),Y) + np.multiply((1-Y),np.log(1-A2))
+    cost = - np.sum(logprobs)/m
     ### END CODE HERE ###
     
     cost = float(np.squeeze(cost))  # makes sure cost is the dimension we expect. 
@@ -463,7 +463,7 @@ def compute_cost(A2, Y, parameters):
     return cost
 
 
-# In[14]:
+# In[22]:
 
 A2, Y_assess, parameters = compute_cost_test_case()
 
@@ -618,7 +618,7 @@ print ("db2 = "+ str(grads["db2"]))
 # 
 # 
 
-# In[29]:
+# In[25]:
 
 # GRADED FUNCTION: update_parameters
 
@@ -665,7 +665,7 @@ def update_parameters(parameters, grads, learning_rate = 1.2):
     return parameters
 
 
-# In[30]:
+# In[26]:
 
 parameters, grads = update_parameters_test_case()
 parameters = update_parameters(parameters, grads)
@@ -715,7 +715,7 @@ print("b2 = " + str(parameters["b2"]))
 # 
 # **Instructions**: The neural network model has to use the previous functions in the right order.
 
-# In[ ]:
+# In[27]:
 
 # GRADED FUNCTION: nn_model
 
@@ -738,7 +738,8 @@ def nn_model(X, Y, n_h, num_iterations = 10000, print_cost=False):
     
     # Initialize parameters
     ### START CODE HERE ### (≈ 1 line of code)
-    parameters = None
+    parameters = initialize_parameters(n_x, n_h, n_y)
+    
     ### END CODE HERE ###
     
     # Loop (gradient descent)
@@ -747,16 +748,16 @@ def nn_model(X, Y, n_h, num_iterations = 10000, print_cost=False):
          
         ### START CODE HERE ### (≈ 4 lines of code)
         # Forward propagation. Inputs: "X, parameters". Outputs: "A2, cache".
-        A2, cache = None
+        A2, cache =  forward_propagation(X, parameters)
         
         # Cost function. Inputs: "A2, Y, parameters". Outputs: "cost".
-        cost = None
- 
+        cost = compute_cost(A2, Y, parameters)
+        
         # Backpropagation. Inputs: "parameters, cache, X, Y". Outputs: "grads".
-        grads = None
+        grads = backward_propagation(parameters, cache, X, Y)
  
         # Gradient descent parameter update. Inputs: "parameters, grads". Outputs: "parameters".
-        parameters = None
+        parameters = update_parameters(parameters, grads)
         
         ### END CODE HERE ###
         
@@ -767,7 +768,7 @@ def nn_model(X, Y, n_h, num_iterations = 10000, print_cost=False):
     return parameters
 
 
-# In[ ]:
+# In[28]:
 
 X_assess, Y_assess = nn_model_test_case()
 parameters = nn_model(X_assess, Y_assess, 4, num_iterations=10000, print_cost=True)
@@ -840,7 +841,7 @@ print("b2 = " + str(parameters["b2"]))
 #     
 # As an example, if you would like to set the entries of a matrix X to 0 and 1 based on a threshold you would do: ```X_new = (X > threshold)```
 
-# In[ ]:
+# In[29]:
 
 # GRADED FUNCTION: predict
 
@@ -858,14 +859,14 @@ def predict(parameters, X):
     
     # Computes probabilities using forward propagation, and classifies to 0/1 using 0.5 as the threshold.
     ### START CODE HERE ### (≈ 2 lines of code)
-    A2, cache = None
-    predictions = None
+    A2, cache = forward_propagation(X, parameters)
+    predictions = np.round(A2)
     ### END CODE HERE ###
     
     return predictions
 
 
-# In[ ]:
+# In[30]:
 
 parameters, X_assess = predict_test_case()
 
@@ -886,7 +887,7 @@ print("predictions mean = " + str(np.mean(predictions)))
 
 # It is time to run the model and see how it performs on a planar dataset. Run the following code to test your model with a single hidden layer of $n_h$ hidden units.
 
-# In[ ]:
+# In[31]:
 
 # Build a model with a n_h-dimensional hidden layer
 parameters = nn_model(X, Y, n_h = 4, num_iterations = 10000, print_cost=True)
@@ -907,7 +908,7 @@ plt.title("Decision Boundary for hidden layer size " + str(4))
 # </table>
 # 
 
-# In[ ]:
+# In[32]:
 
 # Print accuracy
 predictions = predict(parameters, X)
@@ -931,7 +932,7 @@ print ('Accuracy: %d' % float((np.dot(Y,predictions.T) + np.dot(1-Y,1-prediction
 # 
 # Run the following code. It may take 1-2 minutes. You will observe different behaviors of the model for various hidden layer sizes.
 
-# In[ ]:
+# In[63]:
 
 # This may take about 2 minutes to run
 
@@ -974,7 +975,7 @@ for i, n_h in enumerate(hidden_layer_sizes):
 
 # If you want, you can rerun the whole notebook (minus the dataset part) for each of the following datasets.
 
-# In[37]:
+# In[33]:
 
 # Datasets
 noisy_circles, noisy_moons, blobs, gaussian_quantiles, no_structure = load_extra_datasets()
